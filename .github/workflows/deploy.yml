@@ -75,7 +75,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          fingerprint: ${{ secrets.VPS_FINGERPRINT }}
+          fingerprint: ""
           script: |
             mkdir -p "$HOME/go-app"
 
@@ -85,7 +85,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          fingerprint: ${{ secrets.VPS_FINGERPRINT }}
+          fingerprint: ""
           source: "compose.yml"
           target: "go-app/"
           overwrite: true
