@@ -82,35 +82,51 @@ jobs:
           script: |
             set -eu
 
-            # 1. Install Docker & Compose if missing
-            if ! command -v docker &> /dev/null; then
-              echo "Docker not found. Setting up Docker repository for Ubuntu..."
+            # 1. Install Docker if missing
+            if ! command -v docker >/dev/null 2>&1; then
+              echo "Docker not found. Installing Docker..."
 
-              # Remove broken old docker repository files if any exist
-              sudo rm -f /etc/apt/sources.list.d/docker.list /etc/apt/sources.list.d/docker.sources
+              # Remove potentially broken Docker repository files
+              sudo rm -f /etc/apt/sources.list.d/docker.list
+              sudo rm -f /etc/apt/sources.list.d/docker.sources
 
+              # Update package lists and install prerequisites
               sudo apt-get update
               sudo apt-get install -y ca-certificates curl gnupg
 
-              # Setup official GPG key
+              # Add Docker's official GPG key
               sudo install -m 0755 -d /etc/apt/keyrings
-              curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor --yes -o /etc/apt/keyrings/docker.gpg
+
+              curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+                | sudo gpg --dearmor --yes \
+                    -o /etc/apt/keyrings/docker.gpg
+
               sudo chmod a+r /etc/apt/keyrings/docker.gpg
 
-              # Add repository using deb822 format (compatible with Ubuntu 24.04 Noble)
+              # Configure Docker's official repository
               CODENAME=$(. /etc/os-release && echo "$VERSION_CODENAME")
-              echo "Types: deb
-              URIs: https://download.docker.com/linux/ubuntu
-              Suites: ${CODENAME}
-              Components: stable
-              Signed-By: /etc/apt/keyrings/docker.gpg" | sudo tee /etc/apt/sources.list.d/docker.sources > /dev/null
 
+              printf '%s\n' \
+                "Types: deb" \
+                "URIs: https://download.docker.com/linux/ubuntu" \
+                "Suites: ${CODENAME}" \
+                "Components: stable" \
+                "Signed-By: /etc/apt/keyrings/docker.gpg" \
+                | sudo tee /etc/apt/sources.list.d/docker.sources > /dev/null
+
+              # Install Docker Engine and Compose
               sudo apt-get update
-              sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-              sudo usermod -aG docker "$USER"
-              sudo ln -sf $(which docker) /usr/bin/docker
+              sudo apt-get install -y \
+                docker-ce \
+                docker-ce-cli \
+                containerd.io \
+                docker-buildx-plugin \
+                docker-compose-plugin
+
+              sudo systemctl enable --now docker
             fi
+
             # 2. Ensure application directory exists
             mkdir -p "$HOME/go-app"
             cd "$HOME/go-app"
@@ -119,7 +135,7 @@ jobs:
             export IMAGE_NAME="${IMAGE%:*}"
             export IMAGE_TAG="${IMAGE##*:}"
 
-            docker compose pull app
-            docker compose up -d app
+            sudo docker compose pull app
+            sudo docker compose up -d app
 
-            docker compose ps
+            sudo docker compose ps
