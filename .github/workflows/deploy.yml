@@ -78,6 +78,9 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           fingerprint: ""
+          source: "compose.yml"
+          target: "~/go-app/"
+          overwrite: true
           envs: IMAGE
           script: |
             set -eu

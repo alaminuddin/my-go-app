@@ -1,0 +1,7 @@
+services:
+  app:
+    image: ${IMAGE_NAME}:${IMAGE_TAG:-latest}
+    container_name: go-app
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8086:8086"
