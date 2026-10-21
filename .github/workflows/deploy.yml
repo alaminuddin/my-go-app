@@ -69,6 +69,27 @@ jobs:
             ${{ steps.image.outputs.name }}:${{ steps.image.outputs.tag }}
             ${{ steps.image.outputs.name }}:latest
 
+      - name: Prepare VPS and copy Compose file
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          fingerprint: ${{ secrets.VPS_FINGERPRINT }}
+          script: |
+            mkdir -p "$HOME/go-app"
+
+      - name: Copy Compose file to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          fingerprint: ${{ secrets.VPS_FINGERPRINT }}
+          source: "compose.yml"
+          target: "go-app/"
+          overwrite: true
+
       - name: Deploy to Ubuntu VPS
         uses: appleboy/ssh-action@v1.2.2
         env:
@@ -78,9 +99,6 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           fingerprint: ""
-          source: "compose.yml"
-          target: "~/go-app/"
-          overwrite: true
           envs: IMAGE
           script: |
             set -eu
@@ -131,7 +149,6 @@ jobs:
             fi
 
             # 2. Ensure application directory exists
-            mkdir -p "$HOME/go-app"
             cd "$HOME/go-app"
 
             # 3. Deploy container
