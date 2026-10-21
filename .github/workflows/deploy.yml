@@ -151,11 +151,17 @@ jobs:
             # 2. Ensure application directory exists
             cd "$HOME/go-app"
 
-            # 3. Deploy container
+            # Extract image name and tag
             export IMAGE_NAME="${IMAGE%:*}"
             export IMAGE_TAG="${IMAGE##*:}"
 
-            sudo docker compose pull app
-            sudo docker compose up -d app
+            # Verify variables
+            echo "Deploying image: ${IMAGE_NAME}:${IMAGE_TAG}"
 
-            sudo docker compose ps
+            # Pull and deploy
+            sudo --preserve-env=IMAGE_NAME,IMAGE_TAG docker compose -f compose.yml pull app
+            sudo --preserve-env=IMAGE_NAME,IMAGE_TAG docker compose -f compose.yml up -d app
+
+            # Verify deployment
+            sudo docker ps
+            sudo docker compose -f compose.yml ps
