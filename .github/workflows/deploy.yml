@@ -82,6 +82,7 @@ jobs:
           script: |
             set -eu
 
+            mkdir -p "$HOME/go-app"
             cd "$HOME/go-app"
 
             export IMAGE_NAME="${IMAGE%:*}"
