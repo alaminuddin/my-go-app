@@ -69,7 +69,7 @@ jobs:
             ${{ steps.image.outputs.name }}:latest
   deploy:
     runs-on: ubuntu-latest
-    needs: test
+    needs: build
 
     steps:
       - name: Prepare VPS and copy Compose file
