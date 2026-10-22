@@ -31,7 +31,8 @@ jobs:
 
       - name: Build application
         run: go build -o my-go-app .
-  build:
+
+  build-and-deploy:
     runs-on: ubuntu-latest
     needs: test
 
@@ -67,14 +68,7 @@ jobs:
           tags: |
             ${{ steps.image.outputs.name }}:${{ steps.image.outputs.tag }}
             ${{ steps.image.outputs.name }}:latest
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
 
-    permissions:
-      contents: read
-
-    steps:
       - name: Prepare VPS and copy Compose file
         uses: appleboy/ssh-action@v1.2.2
         with:
